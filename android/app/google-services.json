@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "722495213340",
+    "project_id": "siteworx-v2",
+    "storage_bucket": "siteworx-v2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:722495213340:android:2fd341c7904acdcc7634d9",
+        "android_client_info": {
+          "package_name": "ng.siteworx.client"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "722495213340-qjlucmuhven4r35udcl50urit6feub10.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4AuLvlEQ1C6A-Bk8LvPyoUm5_nzkbnRQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "722495213340-63h7b0univ3c7a2omfnoi3k6n011b0in.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:722495213340:android:ec7547a14a2825407634d9",
+        "android_client_info": {
+          "package_name": "ng.siteworx.provider"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "722495213340-qjlucmuhven4r35udcl50urit6feub10.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4AuLvlEQ1C6A-Bk8LvPyoUm5_nzkbnRQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "722495213340-63h7b0univ3c7a2omfnoi3k6n011b0in.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
