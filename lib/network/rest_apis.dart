@@ -142,78 +142,17 @@ Future<void> clearPreferences() async {
   if (isAndroid) await OneSignal.shared.clearOneSignalNotifications();
 }
 
-Future<void> logout(BuildContext context) async {
-  return showInDialog(
-    context,
-    contentPadding: EdgeInsets.zero,
-    builder: (p0) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Image.asset(logout_image, width: context.width(), fit: BoxFit.cover),
-          32.height,
-          Text(language.lblLogoutTitle, style: boldTextStyle(size: 18)),
-          16.height,
-          Text(language.lblLogoutSubTitle, style: secondaryTextStyle()),
-          28.height,
-          Row(
-            children: [
-              AppButton(
-                child: Text(language.lblNo, style: boldTextStyle()),
-                elevation: 0,
-                onTap: () {
-                  finish(context);
-                },
+
               ).expand(),
               16.width,
-              AppButton(
-                child: Text(language.lblYes, style: boldTextStyle(color: white)),
-                color: primaryColor,
-                elevation: 0,
-                onTap: () async {
-                  finish(context);
-
-                  if (await isNetworkAvailable()) {
-                    appStore.setLoading(true);
-
-                    logoutApi().then((value) async {
-                      //
-                    }).catchError((e) {
-                      log(e.toString());
-                    });
-
-                    await clearPreferences();
-                    await FirebaseAuth.instance.signOut();
-
-                    appStore.setLoading(false);
-                    DashboardScreen().launch(context, isNewTask: true, pageRouteAnimation: PageRouteAnimation.Fade);
-                  }
-                },
-              ).expand(),
-            ],
-          ),
-        ],
-      ).paddingSymmetric(horizontal: 16, vertical: 24);
-    },
-  );
-}
-
-Future<void> logoutApi() async {
-  cachedDashboardResponse = null;
-  cachedBookingList = null;
-  cachedCategoryList = null;
-  cachedBookingStatusDropdown = null;
-
-  return await handleResponse(await buildHttpResponse('logout', method: HttpMethodType.GET));
-}
+     
+ 
 
 Future<BaseResponseModel> changeUserPassword(Map request) async {
   return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse('change-password', request: request, method: HttpMethodType.POST)));
 }
 
-Future<BaseResponseModel> forgotPassword(Map request) async {
-  return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse('forgot-password', request: request, method: HttpMethodType.POST)));
-}
+
 
 Future<BaseResponseModel> deleteAccountCompletely() async {
   return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse('delete-user-account', request: {}, method: HttpMethodType.POST)));
@@ -248,14 +187,6 @@ Future<void> editUserProfileData({required Map<String, dynamic> req, File? image
     appStore.setLoading(false);
     toast(e.toString());
   });
-}
-
-//endregion
-
-//region Country Api
-Future<List<CountryListResponse>> getCountryList() async {
-  Iterable res = await (handleResponse(await buildHttpResponse('country-list', method: HttpMethodType.POST)));
-  return res.map((e) => CountryListResponse.fromJson(e)).toList();
 }
 
 Future<List<StateListResponse>> getStateList(Map request) async {
@@ -305,33 +236,6 @@ Future<ConfigurationResponse> getAppConfigurations({bool isCurrentLocation = fal
 }
 //endregion
 
-//region User Api
-Future<DashboardResponse> userDashboard({bool isCurrentLocation = false, double? lat, double? long}) async {
-  Completer<DashboardResponse> completer = Completer();
-
-  String endPoint = 'dashboard-detail';
-
-  if (isCurrentLocation && appStore.isLoggedIn && appStore.userId.validate() != 0) {
-    endPoint = "$endPoint?latitude=$lat&longitude=$long&?customer_id=${appStore.userId.validate()}}";
-  } else if (isCurrentLocation) {
-    endPoint = "$endPoint?latitude=$lat&longitude=$long";
-  } else if (appStore.isLoggedIn && appStore.userId.validate() != 0) {
-    endPoint = "$endPoint?customer_id=${appStore.userId.validate()}";
-  }
-
-  try {
-    final response = await buildHttpResponse(endPoint, method: HttpMethodType.GET);
-    final dashboardResponse = DashboardResponse.fromJson(await handleResponse(response));
-
-    completer.complete(dashboardResponse);
-    // Perform additional code or post-processing
-    _performAdditionalProcessing(dashboardResponse);
-  } catch (e) {
-    completer.completeError(e);
-  }
-
-  return completer.future;
-}
 
 void _performAdditionalProcessing(DashboardResponse dashboardResponse) async {
   cachedDashboardResponse = dashboardResponse;
@@ -383,17 +287,6 @@ void _performAdditionalProcessing(DashboardResponse dashboardResponse) async {
   }
 }
 
-Future<num> getUserWalletBalance() async {
-  var res = WalletResponse.fromJson(await handleResponse(await buildHttpResponse('user-wallet-balance', method: HttpMethodType.GET)));
-
-  return res.balance.validate();
-}
-//endregion
-
-//region Service Api
-Future<ServiceDetailResponse> getServiceDetail(Map request) async {
-  return ServiceDetailResponse.fromJson(await handleResponse(await buildHttpResponse('service-detail', request: request, method: HttpMethodType.POST)));
-}
 
 Future<ServiceDetailResponse> getServiceDetails({required int serviceId, int? customerId, bool fromBooking = false}) async {
   if (fromBooking) {
@@ -494,27 +387,6 @@ Future<List<ServiceData>> searchServiceAPI({
 
 //region Category Api
 
-Future<CategoryResponse> getCategoryList(String page) async {
-  return CategoryResponse.fromJson(await handleResponse(await buildHttpResponse('category-list?page=$page&per_page=50', method: HttpMethodType.GET)));
-}
-
-Future<List<CategoryData>> getCategoryListWithPagination(int page, {var perPage = PER_PAGE_CATEGORY_ITEM, required List<CategoryData> categoryList, Function(bool)? lastPageCallBack}) async {
-  try {
-    CategoryResponse res = CategoryResponse.fromJson(await handleResponse(await buildHttpResponse('category-list?per_page=$perPage&page=$page', method: HttpMethodType.GET)));
-
-    if (page == 1) categoryList.clear();
-    categoryList.addAll(res.categoryList.validate());
-
-    cachedCategoryList = categoryList;
-
-    lastPageCallBack?.call(res.categoryList.validate().length != PER_PAGE_CATEGORY_ITEM);
-
-    appStore.setLoading(false);
-  } catch (e) {
-    appStore.setLoading(false);
-    throw e;
-  }
-
   return categoryList;
 }
 //endregion
@@ -567,15 +439,6 @@ Future<ProviderInfoResponse> getProviderDetail(int id, {int? userId}) async {
   }
 }
 
-Future<ProviderListResponse> getProvider({String? userType = "provider"}) async {
-  return ProviderListResponse.fromJson(await handleResponse(await buildHttpResponse('user-list?user_type=$userType&per_page=all', method: HttpMethodType.GET)));
-}
-//endregion
-
-//region Handyman Api
-Future<UserData> getHandymanDetail(int id) async {
-  return UserData.fromJson(await handleResponse(await buildHttpResponse('user-detail?id=$id', method: HttpMethodType.GET)));
-}
 
 Future<BaseResponseModel> handymanRating(Map request) async {
   return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse('save-handyman-rating', request: request, method: HttpMethodType.POST)));
@@ -609,28 +472,6 @@ Future<List<BookingData>> getBookingList(int page, {var perPage = PER_PAGE_ITEM,
   }
 }
 
-Future<BookingDetailResponse> getBookingDetail(Map request) async {
-  try {
-    BookingDetailResponse bookingDetailResponse = BookingDetailResponse.fromJson(await handleResponse(await buildHttpResponse('booking-detail', request: request, method: HttpMethodType.POST)));
-    calculateTotalAmount(
-      serviceDiscountPercent: bookingDetailResponse.service!.discount.validate(),
-      qty: bookingDetailResponse.bookingDetail!.quantity!.toInt(),
-      detail: bookingDetailResponse.service,
-      servicePrice: bookingDetailResponse.service!.price.validate(),
-      taxes: bookingDetailResponse.bookingDetail!.taxes.validate(),
-      couponData: bookingDetailResponse.couponData,
-      extraCharges: bookingDetailResponse.bookingDetail!.extraCharges,
-    );
-
-    appStore.setLoading(false);
-
-    return bookingDetailResponse;
-  } catch (e) {
-    appStore.setLoading(false);
-
-    throw e;
-  }
-}
 
 Future<BaseResponseModel> updateBooking(Map request) async {
   BaseResponseModel baseResponse = BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse('booking-update', request: request, method: HttpMethodType.POST)));
@@ -670,23 +511,7 @@ Future<List<PaymentData>> getPaymentList(int page, int id, List<PaymentData> lis
   return list;
 }
 
-//endregion
 
-//region Notification Api
-Future<List<NotificationData>> getNotification({Map? request}) async {
-  try {
-    NotificationListResponse res = NotificationListResponse.fromJson(
-      await (handleResponse(await buildHttpResponse('notification-list?customer_id=${appStore.userId}', request: request, method: HttpMethodType.POST))),
-    );
-
-    appStore.setLoading(false);
-    return res.notificationData.validate();
-  } catch (e) {
-    appStore.setLoading(false);
-    throw e;
-  }
-}
-//endregion
 
 //region Review Api
 Future<BaseResponseModel> updateReview(Map request) async {
@@ -753,13 +578,7 @@ Future<List<ServiceData>> getWishlist(int page, {var perPage = PER_PAGE_ITEM, re
   return services;
 }
 
-Future<BaseResponseModel> addWishList(request) async {
-  return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse('save-favourite', method: HttpMethodType.POST, request: request)));
-}
 
-Future<BaseResponseModel> removeWishList(request) async {
-  return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse('delete-favourite', method: HttpMethodType.POST, request: request)));
-}
 
 //endregion
 
@@ -790,10 +609,7 @@ Future<BaseResponseModel> removeProviderWishList(request) async {
 }
 //endregion
 
-//region Get My Service List API
-Future<ServiceResponse> getMyServiceList() async {
-  return ServiceResponse.fromJson(await handleResponse(await buildHttpResponse('service-list?customer_id=${appStore.userId.validate()}', method: HttpMethodType.GET)));
-}
+
 //endregion
 
 //region Get My post job
@@ -802,9 +618,6 @@ Future<BaseResponseModel> savePostJob(Map request) async {
   return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse('save-post-job', request: request, method: HttpMethodType.POST)));
 }
 
-Future<BaseResponseModel> deletePostRequest({required num id}) async {
-  return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse('post-job-delete/$id', request: {}, method: HttpMethodType.POST)));
-}
 
 Future<BaseResponseModel> deleteServiceRequest(int id) async {
   return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse('service-delete/$id', request: {}, method: HttpMethodType.POST)));
@@ -840,17 +653,6 @@ Future<PostJobDetailResponse> getPostJobDetail(Map request) async {
   }
 }
 
-//endregion
-
-//region FlutterWave Verify Transaction API
-Future<VerifyTransactionResponse> verifyPayment({required String transactionId, required String flutterWaveSecretKey}) async {
-  return VerifyTransactionResponse.fromJson(
-    await handleResponse(await buildHttpResponse("https://api.flutterwave.com/v3/transactions/$transactionId/verify", extraKeys: {
-      'isFlutterWave': true,
-      'flutterWaveSecretKey': flutterWaveSecretKey,
-    })),
-  );
-}
 //endregion
 
 //region Sadad Payment Api
